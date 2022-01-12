@@ -1,0 +1,26 @@
+@model LoginViewModel;
+
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="container">
+  <div class="text-center">
+    <h3>Sign in</h3>
+    <form method="POST" asp-action="Login">
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input name="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input name="password" type="password" class="form-control" id="password" placeholder="Password" 
+               pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
+               title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
+      </div>
+      <button type="submit" class="btn btn-outline-primary">Sign in</button>
+    </form>
+    <p>Don't have an account? </p>
+    <a asp-action="Register" class="btn btn-outline-info">Register</a>
+  </div>
+</div>

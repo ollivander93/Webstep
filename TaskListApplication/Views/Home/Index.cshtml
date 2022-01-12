@@ -1,0 +1,218 @@
+﻿@model IndexViewModel
+@using Microsoft.AspNetCore.Http
+@using TaskApi.Models
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container text-wrap">
+    @if (string.IsNullOrEmpty(HttpContextAccessor.HttpContext.Session.GetString("token")))
+    {
+        <div class="text-center">
+            <h1 class="display-4">Welcome to the TaskList app</h1>
+            <p>To start using this app, please sign in or create a new account</p>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-success" asp-action="Login">Sign in</a>
+                    <a class="btn btn-outline-info" asp-action="Register">Register</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h1>Welcome</h1>
+        </div>
+            @if (@Model.TaskLists is not {Count: > 0 })
+            {
+                <p>You don't have any task lists. Create one to get started!</p>
+            }
+            else
+            {
+                <div class="text-center">
+                    <h2>Your current task lists</h2>
+                </div>
+                <div>
+                @foreach (var taskList in @Model.TaskLists)
+                {
+                    <div class="card text-center mt-2">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col d-flex justify-content-start">
+                                    <a class="btn btn-link" data-toggle="collapse" href="#collapse-@taskList.Id"
+                                       role="button" aria-expanded="false" aria-controls="collapse-@taskList.Id">
+                                        <i class="fas fa-arrows-alt-v"></i>
+                                        Show/Hide
+                                    </a>
+                                </div>
+                                <div class="col font-weight-bold">
+                                    @taskList.Name
+                                </div>
+                                <div class="col d-flex justify-content-end">
+                                    @using (Html.BeginForm("DeleteTaskList", "Home"))
+                                    {
+                                        <button class="btn btn-outline-danger rounded-pill" name="taskListId" value="@taskList.Id">
+                                            <i class="far fa-trash-alt"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body collapse" id="collapse-@taskList.Id">
+                            <ul class="list-group">
+                                @if (taskList.Tasks?.Count > 0)
+                                {
+                                    @foreach (var task in taskList.Tasks)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div class="ms-2 mr-auto">
+                                                <div class="font-weight-bold">@task.Title</div>
+                                                @task.Note
+                                            </div>
+                                            <button type="button" class="btn btn-secondary btn-sm rounded-circle mr-3" 
+                                                    title="edit"
+                                                    data-toggle="modal"
+                                                    data-target="#editTaskModal"
+                                                    data-taskid="@task.Id"
+                                                    data-listid="@task.TaskListId"
+                                                    data-title="@task.Title"
+                                                    data-note="@task.Note">
+                                                <span><i class="far fa-edit"></i></span>
+                                            </button>
+                                            @using (Html.BeginForm("DeleteTask", "Home"))
+                                            {
+                                                <button name="taskId" value="@task.Id" class="btn btn-danger btn-sm rounded-circle mr-3" title="delete">
+                                                    <span><i class="far fa-trash-alt"></i></span>
+                                                </button>   
+                                            }
+                                        </li>
+                                    }   
+                                }
+                            </ul>
+                            <br/>
+                            <div class="row justify-content-end">
+                                <div class="col">
+                                    <button type="button" class="btn btn-outline-secondary" data-toggle="modal" 
+                                            data-target="#taskModal" data-listid="@taskList.Id" data-listname="@taskList.Name">
+                                        <i class="fas fa-plus"></i>Add new task
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        <div class="row mt-2">
+            <div class="col">
+                <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#taskListModal">
+                    Create new list
+                </button>
+            </div>
+        </div>
+        <!-- CREATE TASK LIST MODAL START -->
+        <div class="modal fade" id="taskListModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">New task list</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" asp-action="CreateTaskList">
+                            <div class="form-group">
+                                <label for="tasklist-name" class="col-form-label">List name</label>
+                                <input name="taskListName" type="text" class="form-control" id="tasklist-name">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- CREATE TASK LIST MODAL END -->
+        
+        <!-- CREATE TASK MODAL START -->
+        <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">New task</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" asp-action="CreateTask">
+                            <div class="form-group">
+                                <input class="form-control d-none" id="owner-id" name="taskListId" />
+                                
+                                <label for="owner-list" class="col-form-label">List</label>
+                                <input class="form-control" id="owner-list" type="text" readonly>
+
+                                <label for="task-name" class="col-form-label">Title</label>
+                                <input name="title" type="text" class="form-control" id="task-name"/>
+
+                                <label for="task-note" class="col-form-label">Note</label>
+                                <textarea name="note" class="form-control" id="task-note" rows="3"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- CREATE TASK MODAL END -->
+        
+        <!-- EDIT TASK MODAL START -->
+        <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateTaskLabel">Update task</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" asp-action="EditTask">
+                            <div class="form-group">
+                                <input class="form-control d-none" id="task-id" name="taskId"/>
+                                
+                                <select class="form-control" name="taskListId">
+                                    @foreach (var taskList in @Model.TaskLists)
+                                    {
+                                        <option id="@taskList.Id" value="@taskList.Id">@taskList.Name</option>
+                                    }
+                                </select>
+
+                                <label for="task-name" class="col-form-label">Title</label>
+                                <input name="title" type="text" class="form-control" id="task-name"/>
+
+                                <label for="task-note" class="col-form-label">Note</label>
+                                <textarea name="note" class="form-control" id="task-note" rows="3"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- EDIT TASK MODAL END -->
+        <script src="~/js/site.js" asp-append-version="true"></script>
+    }
+</div>
