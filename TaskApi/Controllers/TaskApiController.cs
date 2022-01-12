@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,14 +23,12 @@ namespace TaskApi.Controllers
             _context = context;
         }
 
-        // GET: api/TaskApi
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Task>>> GetTasks()
         {
             return await _context.Tasks.ToListAsync();
         }
 
-        // GET: api/TaskApi/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Task>> GetTask(int id)
         {
@@ -55,11 +51,10 @@ namespace TaskApi.Controllers
             taskPatch.ApplyTo(task);
             _context.Entry(task).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+
             return (Ok(task));
         }
 
-        // PUT: api/TaskApi/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTask(int id, Task task)
         {
@@ -80,10 +75,8 @@ namespace TaskApi.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();

@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -23,16 +18,16 @@ namespace TaskApi.Controllers
     public class AuthManagementController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly IUserService _userService;
+        private readonly ITokenService _tokenService;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly ApplicationDbContext _context;
 
         public AuthManagementController(
-            UserManager<IdentityUser> userManager, IUserService userService, 
+            UserManager<IdentityUser> userManager, ITokenService tokenService, 
             TokenValidationParameters tokenValidationParameters, ApplicationDbContext context)
         {
             _userManager = userManager;
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _tokenValidationParameters = tokenValidationParameters ?? throw new ArgumentNullException(nameof(tokenValidationParameters));
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
@@ -59,18 +54,17 @@ namespace TaskApi.Controllers
                     }});
             }
 
-            var newUser = new IdentityUser(){Email = user.Email, UserName = user.Email};
+            var newUser = new IdentityUser{ Email = user.Email, UserName = user.Email };
             var isCreated = await _userManager.CreateAsync(newUser, user.Password);
             if(isCreated.Succeeded)
             {
-                return Ok(await _userService.GenerateJwtToken(newUser));
+                return Ok(await _tokenService.GenerateJwtToken(newUser));
             }
 
             return new JsonResult(new AuthResult{
                 Result = false,
                 Errors = isCreated.Errors.Select(x => x.Description).ToList()}
             ) {StatusCode = 500};
-
         }
 
         [HttpPost]
@@ -94,7 +88,7 @@ namespace TaskApi.Controllers
 
             if (await _userManager.CheckPasswordAsync(existingUser, user.Password))
             {
-                return Ok(await _userService.GenerateJwtToken(existingUser));
+                return Ok(await _tokenService.GenerateJwtToken(existingUser));
             }
 
             return BadRequest(new RegistrationResponse() {
@@ -118,7 +112,7 @@ namespace TaskApi.Controllers
                     Result = false
                 });
 
-            var res = await _userService.VerifyToken(tokenRequest);
+            var res = await _tokenService.RefreshTokenAsync(tokenRequest);
             if (res == null)
                 return BadRequest(new RegistrationResponse(){
                     Errors = new List<string>() {

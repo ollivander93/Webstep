@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -8,9 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskApi.Data;
-using TaskApi.Models;
 using TaskApi.Models.DTO.Responses;
-using TaskApi.Services;
 
 namespace TaskApi.Controllers
 {
@@ -20,12 +17,10 @@ namespace TaskApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IUserService _userService;
 
-        public UserController(ApplicationDbContext dbContext, IUserService userService)
+        public UserController(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         [HttpGet("{id}")]

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using TaskApi.Data;
 using TaskApi.Models;
 using TaskApi.Services;
-using Task = TaskApi.Models.Task;
 
 namespace TaskApi.Controllers
 {
@@ -28,14 +26,12 @@ namespace TaskApi.Controllers
             _taskListService = taskListService ?? throw new ArgumentNullException(nameof(taskListService));
         }
 
-        // GET: api/TaskListApi
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskList>>> GetTaskLists()
         {
             return await _context.TaskLists.ToListAsync();
         }
 
-        // GET: api/TaskListApi/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskList>> GetTaskList(string id)
         {
@@ -67,8 +63,6 @@ namespace TaskApi.Controllers
             return taskLists;
         }
 
-        // PUT: api/TaskListApi/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTaskList(int id, TaskList taskList)
         {
@@ -89,17 +83,13 @@ namespace TaskApi.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/TaskListApi
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TaskList>> PostTaskList(TaskList taskList)
         {
@@ -111,7 +101,6 @@ namespace TaskApi.Controllers
             return CreatedAtAction("GetTaskList", new { id = taskList.Id }, taskList);
         }
 
-        // DELETE: api/TaskListApi/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskList(int id)
         {
