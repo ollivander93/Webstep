@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using TaskApi.Data;
 using TaskApi.Domain;
 using TaskApi.Models.DTO.Requests;
 using TaskApi.Models.DTO.Responses;
@@ -19,17 +17,12 @@ namespace TaskApi.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ITokenService _tokenService;
-        private readonly TokenValidationParameters _tokenValidationParameters;
-        private readonly ApplicationDbContext _context;
 
         public AuthManagementController(
-            UserManager<IdentityUser> userManager, ITokenService tokenService, 
-            TokenValidationParameters tokenValidationParameters, ApplicationDbContext context)
+            UserManager<IdentityUser> userManager, ITokenService tokenService)
         {
             _userManager = userManager;
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
-            _tokenValidationParameters = tokenValidationParameters ?? throw new ArgumentNullException(nameof(tokenValidationParameters));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         [HttpPost]

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using TaskListApplication.Http;
+using TaskListApplication.Services;
 
 namespace TaskListApplication
 {
@@ -28,8 +30,13 @@ namespace TaskListApplication
             services.AddMemoryCache();
             services.AddSession();
             services.AddHttpContextAccessor();
-
-            services.AddTransient<ITaskApiHttpClientWrapper, TaskApiHttpClientWrapper>();
+            
+            services.AddTransient<ITokenService, TokenService>();
+            services.AddTransient<IHttpClientProvider, HttpClientProvider>();
+            services.AddTransient<IAuthenticationService, AuthenticationService>();
+            services.AddTransient<ITaskListService, TaskListService>();
+            services.AddTransient<ITaskService, TaskService>();
+            services.AddTransient<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
