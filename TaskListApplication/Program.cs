@@ -20,8 +20,6 @@ namespace TaskListApplication
                     var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                     webBuilder.UseStartup<Startup>();
                     webBuilder.ConfigureAppConfiguration(config =>
-                        config.AddJsonFile($"ocelot.{env}.json"));
-                    webBuilder.ConfigureAppConfiguration(config =>
                     {
                         var ocelotConfigFile = string.IsNullOrEmpty(env) ? "ocelot.json" : $"ocelot.{env}.json";
                         config.AddJsonFile(ocelotConfigFile);
